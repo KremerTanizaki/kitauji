@@ -1,0 +1,19 @@
+import MeCab
+data=open("tani.txt","rb").read()
+text=data.decode("utf-8")
+m=MeCab.Tagger("-ochasen")
+node=m.parseToNode(text)
+tani_text=[]
+while node:
+    word=node.surface
+    hinnsi=node.feature.split(",")[0]
+    if hinnsi in ["名詞"]:
+        tani_text.append(word)
+    node=node.next
+
+from wordcloud import WordCloud
+text=" ".join(tani_text)
+fpath="C:/Windows/Fonts/HGRGY.TTC"
+wordcloud=WordCloud(background_color="black",stopwords={"そこ","ため","それ","こと","よう","いる","する","ある","ところ","なく","いい","そう","ない","もの","なる","あり","うち","これ","なっ","あっ","もう","あれ","","",}\
+,font_path=fpath,width=800,height=600).generate(text)
+wordcloud.to_file("./tani.png")
