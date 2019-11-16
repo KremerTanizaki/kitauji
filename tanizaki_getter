@@ -1,0 +1,45 @@
+from urllib.request import urlopen,urlretrieve
+from urllib.error import HTTPError
+import webbrowser as wb
+from bs4 import BeautifulSoup as bs
+import MeCab
+import re
+
+# 正常なURLかどうかチェック
+def check(url):
+    try:
+        html=urlopen(url)
+    except HTTPError as e:
+        print(e)
+        return None
+    try:
+        bsobj=bs(html,"lxml")
+    except AttributeError as e:
+        return None
+    return bsobj
+
+novelist="https://www.aozora.gr.jp/index_pages/person1383.html#sakuhin_list_1"
+bsobj=check(novelist)
+url=[]
+text=[]
+for link in bsobj.findAll("a", href=re.compile("../cards/[0-9]*/card[0-9]*.html")):
+    if "href" in link.attrs:
+        a=(link.attrs["href"])
+        a=a.replace("..","https://www.aozora.gr.jp/")
+        a=a.split()
+        for i in a:
+            bsobj2=check(i)
+            for text in bsobj2.findAll("a", href=re.compile("./files/[0-9]*_[0-9]*.html")):
+                if "href" in text.attrs:
+                    b=(text.attrs["href"])
+                    b=b.replace("./","https://www.aozora.gr.jp/cards/001383//")
+                    b=b.split()
+                    b=set(b)
+                    for x in b:
+                        bsobj3=check(x)
+                        tani=bsobj3.findAll("div",class_="main_text")
+                        for z in tani:
+                            text.append(z.text)
+                        for t in text:
+                            with open("tani.txt","a",encoding="utf-8") as f:
+                                f.write(t)
